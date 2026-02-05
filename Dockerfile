@@ -39,6 +39,7 @@ RUN apt-get update && apt-get install -y \
 
 
 ADD start.sh /opt/wireguard/start.sh
+ADD healthcheck.sh /opt/wireguard/healthcheck.sh
 ADD nginx_server.conf /opt/nginx/server.conf
 ADD transmission-default-settings.json /opt/transmission/default-settings.json
 ADD updateSettings.py /opt/transmission/
@@ -55,5 +56,8 @@ ENV TRANSMISSION_HOME=/config/transmission-home \
 # Get base_revision passed as a build argument and set it as env var
 ARG REVISION
 ENV REVISION=${REVISION:-""}
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=180s --retries=3 \
+  CMD wg show wg0 latest-handshakes | awk 'NR==1 {exit ($2 == 0 ? 1 : 0)}'
 
 CMD ["dumb-init", "-vv", "/opt/wireguard/start.sh"]

@@ -263,4 +263,10 @@ python3 /opt/transmission/updateSettings.py /opt/transmission/default-settings.j
 # Support running Transmission as non-root (and set permissions on folders)
 . /opt/transmission/userSetup.sh
 
+# Start WireGuard health check in the background
+if [ -z "${HEALTH_CHECK_ENABLED}" ] || ! [[ "${HEALTH_CHECK_ENABLED,,}" == "false" ]]; then
+  /opt/wireguard/healthcheck.sh &
+  echo "WireGuard health check enabled"
+fi
+
 exec su --preserve-environment ${RUN_AS} -s /bin/bash -c "/usr/bin/transmission-daemon --foreground -g ${TRANSMISSION_HOME}"
